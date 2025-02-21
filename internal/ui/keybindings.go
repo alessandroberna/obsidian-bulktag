@@ -1,9 +1,6 @@
 package ui
 
 import (
-	"os"
-	"path/filepath"
-
 	"github.com/charmbracelet/bubbles/key"
 	tea "github.com/charmbracelet/bubbletea"
 )
@@ -48,95 +45,21 @@ func DefaultKeyMap() KeyMap {
 func basicKeyHandler(m *Model, msg tea.KeyMsg) (tea.Cmd) {
 	switch {
 	case key.Matches(msg, m.keyMap.GoToTop):
-		m.cursorPos = 0
-		m.min = 0
-		m.max = m.height - 1
+		return handleGoToTop(m)
 	case key.Matches(msg, m.keyMap.GoToLast):
-		m.cursorPos = len(m.entries) - 1
-		m.min = len(m.entries) - m.height
-		m.max = len(m.entries) - 1
+		return handleGoToLast(m)
 	case key.Matches(msg, m.keyMap.Down):
-		m.cursorPos++
-		if m.cursorPos >= len(m.entries) {
-			m.cursorPos = len(m.entries) - 1
-		}
-		if m.cursorPos > m.max {
-			m.min++
-			m.max++
-		}
+		return handleDown(m)
 	case key.Matches(msg, m.keyMap.Up):
-		m.cursorPos--
-		if m.cursorPos < 0 {
-			m.cursorPos = 0
-		}
-		if m.cursorPos < m.min {
-			m.min--
-			m.max--
-		}
+		return handleUp(m)
 	case key.Matches(msg, m.keyMap.PageDown):
-		m.cursorPos += m.height
-		if m.cursorPos >= len(m.entries) {
-			m.cursorPos = len(m.entries) - 1
-		}
-		m.min += m.height
-		m.max += m.height
-
-		if m.max >= len(m.entries) {
-			m.max = len(m.entries) - 1
-			m.min = m.max - m.height
-		}
+		return handlePageDown(m)
 	case key.Matches(msg, m.keyMap.PageUp):
-		m.cursorPos -= m.height
-		if m.cursorPos < 0 {
-			m.cursorPos = 0
-		}
-		m.min -= m.height
-		m.max -= m.height
-
-		if m.min < 0 {
-			m.min = 0
-			m.max = m.min + m.height
-		}
+		return handlePageUp(m)
 	case key.Matches(msg, m.keyMap.Back):
-		m.path = filepath.Dir(m.path)
-		if m.selectedStack.Length() > 0 {
-			m.cursorPos, m.min, m.max = m.popView()
-		} else {
-			m.cursorPos = 0
-			m.min = 0
-			m.max = m.height - 1
-		}
-		return m.readDir(m.path)
+		return handleBack(m)
 	case key.Matches(msg, m.keyMap.Open):
-		if len(m.entries) == 0 {
-			break
-		}
-
-		f := m.entries[m.cursorPos]
-		info, err := f.Info()
-		if err != nil {
-			break
-		}
-		isDir := f.IsDir()
-		if info.Mode()&os.ModeSymlink != 0 { // if it's a symlink
-			symlinkPath, _ := filepath.EvalSymlinks(filepath.Join(m.path, f.Name()))
-			info, err := os.Stat(symlinkPath)
-			if err != nil {
-				break
-			}
-			if info.IsDir() {
-				isDir = true
-			}
-		}
-		if isDir {
-			m.path = filepath.Join(m.path, f.Name())
-			m.pushView(m.cursorPos, m.min, m.max)
-			m.cursorPos = 0
-			m.min = 0
-			m.max = m.height - 1
-			return m.readDir(m.path)
-		}
-		// might want to add a markdown renderer here
+		return handleOpen(m)
 	}
 	return nil
 }

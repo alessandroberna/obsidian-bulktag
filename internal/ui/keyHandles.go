@@ -84,6 +84,9 @@ func handleBack(m *Model) tea.Cmd {
 		m.min = 0
 		m.max = m.height - 1
 	}
+	if m.Tags.Parent != nil {
+		m.Tags = m.Tags.Parent
+	}
 	return m.readDir(m.path)
 }
 

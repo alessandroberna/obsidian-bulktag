@@ -190,7 +190,7 @@ func New() Model {
 		cursorGlyph:   ">",
 		styles:        DefaultStyles(),
 		keyMap:        DefaultKeyMap(),
-		Tags:          &folderTag{Path: "", Tag: "", Parent: nil},
+		Tags:          newTagGetter(".", nil),
 	}
 }
 
@@ -348,8 +348,8 @@ func (m Model) View() string {
 		s.WriteRune('\n')
 	}
 
-	s.WriteString("Current Tag: " + m.Tags.Tag + "\n")
-
+	s.WriteString("\nCurrent Tag: " + m.styles.PastTag.Render(m.Tags.parentTagsStr()) + m.styles.PastTag.Render(m.Tags.Tag) + "\n")
+	
 	// Add padding to the bottom of the list
 	for i := lipgloss.Height(s.String()); i <= m.height; i++ {
 		s.WriteRune('\n')

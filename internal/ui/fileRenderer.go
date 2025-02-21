@@ -154,6 +154,7 @@ type Model struct {
 	cursorGlyph string
 	styles      Styles
 	keyMap      KeyMap
+	inputKeyMap InputKeyMap
 
 	Tags    *folderTag // list of tags
 	Message string     // status or feedback message
@@ -190,6 +191,7 @@ func New() Model {
 		cursorGlyph:   ">",
 		styles:        DefaultStyles(),
 		keyMap:        DefaultKeyMap(),
+		inputKeyMap:   DefaultInputKeyMap(),
 		Tags:          newTagGetter(".", nil),
 	}
 }
@@ -348,8 +350,12 @@ func (m Model) View() string {
 		s.WriteRune('\n')
 	}
 
-	s.WriteString("\nCurrent Tag: " + m.styles.PastTag.Render(m.Tags.parentTagsStr()) + m.styles.PastTag.Render(m.Tags.Tag) + "\n")
-	
+	if m.editMode {
+		s.WriteString("\nEditing tag: " + m.textInput.View())
+	} else {
+		s.WriteString("\nCurrent Tag: " + m.styles.PastTag.Render(m.Tags.parentTagsStr()) + "/" + m.styles.PastTag.Render(m.Tags.Tag) + "\n")
+	}
+
 	// Add padding to the bottom of the list
 	for i := lipgloss.Height(s.String()); i <= m.height; i++ {
 		s.WriteRune('\n')

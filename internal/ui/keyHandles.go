@@ -114,6 +114,7 @@ func handleOpen(m *Model) tea.Cmd {
 		m.cursorPos = 0
 		m.min = 0
 		m.max = m.height - 1
+		m.Tags = newTagGetter(m.path, m.Tags)
 		return m.readDir(m.path)
 	}
 	return nil
@@ -122,4 +123,29 @@ func handleOpen(m *Model) tea.Cmd {
 func handleQuit(m *Model) tea.Cmd {
 	m.quitting = true
 	return tea.Quit
+}
+
+func handleEditTag(m *Model) tea.Cmd {
+	m.editMode = true
+	m.textInput.Focus()
+	return nil
+}
+
+func handleAccept(m *Model) tea.Cmd {
+	m.editMode = false
+	m.Tags.Tag = m.textInput.Value()
+	m.textInput.Reset()
+	return nil
+}
+
+func handleCancel(m *Model) tea.Cmd {
+	m.editMode = false
+	m.textInput.Reset()
+	return nil
+}
+
+func handleInput(m *Model, msg tea.KeyMsg) tea.Cmd {
+	var cmd tea.Cmd
+	m.textInput, cmd = m.textInput.Update(msg)
+	return cmd
 }

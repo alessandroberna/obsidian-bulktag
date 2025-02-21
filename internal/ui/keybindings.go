@@ -42,7 +42,22 @@ func DefaultKeyMap() KeyMap {
 	}
 }
 
-func basicKeyHandler(m *Model, msg tea.KeyMsg) (tea.Cmd) {
+type InputKeyMap struct {
+	Accept key.Binding
+	Cancel key.Binding
+}
+
+func DefaultInputKeyMap() InputKeyMap {
+	return InputKeyMap{
+		Accept: key.NewBinding(key.WithKeys("enter"), key.WithHelp("enter", "accept")),
+		Cancel: key.NewBinding(key.WithKeys("esc")),
+	}
+}
+
+func basicKeyHandler(m *Model, msg tea.KeyMsg) tea.Cmd {
+	if m.editMode {
+		return editModeHandler(m, msg)
+	}
 	switch {
 	case key.Matches(msg, m.keyMap.GoToTop):
 		return handleGoToTop(m)
@@ -60,8 +75,21 @@ func basicKeyHandler(m *Model, msg tea.KeyMsg) (tea.Cmd) {
 		return handleBack(m)
 	case key.Matches(msg, m.keyMap.Open):
 		return handleOpen(m)
-	case key.Matches (msg, m.keyMap.Quit):
+	case key.Matches(msg, m.keyMap.Quit):
 		return handleQuit(m)
+	case key.Matches(msg, m.keyMap.EditTag):
+		return handleEditTag(m)
 	}
 	return nil
+}
+
+func editModeHandler(m *Model, msg tea.KeyMsg) tea.Cmd {
+	switch {
+	case key.Matches(msg, m.inputKeyMap.Accept):
+		return handleAccept(m)
+	case key.Matches(msg, m.inputKeyMap.Cancel):
+		return handleCancel(m)
+	default:
+		return handleInput(m, msg)
+	}
 }

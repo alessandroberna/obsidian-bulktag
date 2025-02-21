@@ -20,14 +20,19 @@ type folderTag struct {
 
 var tagMap = make(map[string]*folderTag)
 
+func conditionalSlashJoin(string1 string, string2 string) string {
+	if string1 == "" {
+		return string2
+	}
+	if string2 == "" {
+		return string1
+	}
+	return string1 + "/" + string2
+}
+
 func (f *folderTag) parentTagsStr() string {
 	if f.Parent != nil {
-		result := f.Parent.parentTagsStr()
-		if result != "" {
-			return result + "/" +  f.Parent.Tag
-		} else {
-			return f.Parent.Tag
-		}
+		return conditionalSlashJoin(f.Parent.parentTagsStr(), f.Parent.Tag) // ../../. + "/" + ../. 
 	} else {
 		return ""
 	}
@@ -35,12 +40,7 @@ func (f *folderTag) parentTagsStr() string {
 
 func (f *folderTag) fullTagStr() string {
 	if f.Tag != "" {
-		result := f.Parent.parentTagsStr()
-		if result != "" {
-			return result + "/" + f.Tag
-		} else {
-			return f.Tag
-		}
+		return conditionalSlashJoin(f.parentTagsStr(), f.Tag)
 	} else {
 		return f.parentTagsStr()
 	}
@@ -353,7 +353,7 @@ func (m Model) View() string {
 	if m.editMode {
 		s.WriteString("\nEditing tag: " + m.textInput.View())
 	} else {
-		s.WriteString("\nCurrent Tag: " + m.styles.PastTag.Render(m.Tags.parentTagsStr()) + "/" + m.styles.PastTag.Render(m.Tags.Tag) + "\n")
+		s.WriteString("\nCurrent Tag: " + conditionalSlashJoin(m.styles.PastTag.Render(m.Tags.parentTagsStr()), m.styles.PastTag.Render(m.Tags.Tag)) + "\n")
 	}
 
 	// Add padding to the bottom of the list

@@ -291,7 +291,6 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 // View returns the view of the file picker.
 func (m Model) View() string {
 	if m.quitting {
-		print(tea.ClearScreen())
 		return ""
 	}
 

@@ -14,12 +14,47 @@ import (
 
 // keeps track of tags for each folder
 type folderTag struct {
-	Path   string // relative path from root
 	Tag    string // tag for this folder entry
 	Parent *folderTag
 }
 
 var tagMap = make(map[string]*folderTag)
+
+func (f *folderTag) parentTagsStr() string {
+	if f.Parent != nil {
+		result := f.Parent.parentTagsStr()
+		if result != "" {
+			return result + "/" +  f.Parent.Tag
+		} else {
+			return f.Parent.Tag
+		}
+	} else {
+		return ""
+	}
+}
+
+func (f *folderTag) fullTagStr() string {
+	if f.Tag != "" {
+		result := f.Parent.parentTagsStr()
+		if result != "" {
+			return result + "/" + f.Tag
+		} else {
+			return f.Tag
+		}
+	} else {
+		return f.parentTagsStr()
+	}
+}
+
+func newTagGetter(path string, parent *folderTag) *folderTag {
+	if tag, exists := tagMap[path]; exists {
+		return tag
+	} else {
+		tag := &folderTag{Tag: "", Parent: parent}
+		tagMap[path] = tag
+		return tag
+	}
+}
 
 // needed to manage the navigation history
 type stack struct {
@@ -266,7 +301,7 @@ func (m Model) View() string {
 	var s strings.Builder
 
 	for i, f := range m.entries {
-		if i < m.min || i > m.max {
+		if i < m.min || i > m.max-2 {
 			continue
 		}
 
@@ -314,6 +349,9 @@ func (m Model) View() string {
 		s.WriteRune('\n')
 	}
 
+	s.WriteString("Current Tag: " + m.Tags.Tag + "\n")
+
+	// Add padding to the bottom of the list
 	for i := lipgloss.Height(s.String()); i <= m.height; i++ {
 		s.WriteRune('\n')
 	}

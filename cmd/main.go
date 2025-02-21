@@ -16,7 +16,6 @@ It provides a navigable interface in the terminal to select folders and apply ta
 	Args: cobra.ExactArgs(1), // Expect exactly one argument: the folder path
 	Run: func(cmd *cobra.Command, args []string) {
 		internal.Config.Root = args[0]
-		internal.Config.ShowFiles = false
 		if _, err := os.Stat(internal.Config.Root); os.IsNotExist(err) {
 			fmt.Println("Error: Folder does not exist:", internal.Config.Root)
 			os.Exit(1)
@@ -36,5 +35,6 @@ func Execute() {
 }
 
 func init() {
-	// No flags defined yet at the root level, can be added later if needed.
+	rootCmd.Flags().BoolVar(&internal.Config.ShowFiles, "no-files", true, "Do not show files in the file picker")
+	rootCmd.Flags().Lookup("no-files").NoOptDefVal = "false"
 }

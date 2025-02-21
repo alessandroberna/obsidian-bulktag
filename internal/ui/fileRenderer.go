@@ -243,7 +243,8 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		}
 		m.max = m.height - 1
 	case tea.KeyMsg:
-		basicKeyHandler(&m, msg)
+		cmd := basicKeyHandler(&m, msg)
+		return m, cmd
 	}
 	return m, nil
 }

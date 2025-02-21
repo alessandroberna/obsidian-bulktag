@@ -45,7 +45,7 @@ func DefaultKeyMap() KeyMap {
 	}
 }
 
-func basicKeyHandler(m *Model, msg tea.KeyMsg) (tea.Model, tea.Cmd) {
+func basicKeyHandler(m *Model, msg tea.KeyMsg) (tea.Cmd) {
 	switch {
 	case key.Matches(msg, m.keyMap.GoToTop):
 		m.cursorPos = 0
@@ -106,7 +106,7 @@ func basicKeyHandler(m *Model, msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 			m.min = 0
 			m.max = m.height - 1
 		}
-		return m, m.readDir(m.path)
+		return m.readDir(m.path)
 	case key.Matches(msg, m.keyMap.Open):
 		if len(m.entries) == 0 {
 			break
@@ -134,9 +134,9 @@ func basicKeyHandler(m *Model, msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 			m.cursorPos = 0
 			m.min = 0
 			m.max = m.height - 1
-			return m, m.readDir(m.path)
+			return m.readDir(m.path)
 		}
 		// might want to add a markdown renderer here
 	}
-	return m, nil
+	return nil
 }

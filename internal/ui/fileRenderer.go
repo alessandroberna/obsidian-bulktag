@@ -30,6 +30,16 @@ func conditionalSlashJoin(string1 string, string2 string) string {
 	return string1 + "/" + string2
 }
 
+func styledConditionalSlashJoin(string1 string, string2 string, style1 lipgloss.Style, style2 lipgloss.Style) string {
+	if string1 == "" {
+		return style2.Render(string2)
+	}
+	if string2 == "" {
+		return style1.Render(string1)
+	}
+	return style1.Render(string1 + "/") + style2.Render(string2)
+}
+
 func (f *folderTag) parentTagsStr() string {
 	if f.Parent != nil {
 		return conditionalSlashJoin(f.Parent.parentTagsStr(), f.Parent.Tag) // ../../. + "/" + ../. 
@@ -351,9 +361,9 @@ func (m Model) View() string {
 	}
 
 	if m.editMode {
-		s.WriteString("\nEditing tag: " + m.textInput.View())
+		s.WriteString("\nEditing tag: " + styledConditionalSlashJoin(m.Tags.parentTagsStr(), m.textInput.View(), m.styles.PastTag, m.styles.CurrentTag))
 	} else {
-		s.WriteString("\nCurrent Tag: " + conditionalSlashJoin(m.styles.PastTag.Render(m.Tags.parentTagsStr()), m.styles.PastTag.Render(m.Tags.Tag)) + "\n")
+		s.WriteString("\nCurrent Tag: " + styledConditionalSlashJoin(m.Tags.parentTagsStr(), m.Tags.Tag, m.styles.PastTag, m.styles.CurrentTag))
 	}
 
 	// Add padding to the bottom of the list

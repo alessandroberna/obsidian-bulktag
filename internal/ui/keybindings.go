@@ -60,6 +60,8 @@ func basicKeyHandler(m *Model, msg tea.KeyMsg) (tea.Cmd) {
 		return handleBack(m)
 	case key.Matches(msg, m.keyMap.Open):
 		return handleOpen(m)
+	case key.Matches (msg, m.keyMap.Quit):
+		return handleQuit(m)
 	}
 	return nil
 }

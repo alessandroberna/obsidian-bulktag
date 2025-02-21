@@ -119,3 +119,7 @@ func handleOpen(m *Model) tea.Cmd {
 	return nil
 }
 
+func handleQuit(m *Model) tea.Cmd {
+	m.quitting = true
+	return tea.Quit
+}

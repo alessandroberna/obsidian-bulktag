@@ -96,14 +96,16 @@ type NavModel struct {
 type Model struct {
 	id int
 
-	Root         string          // root path
-	AllowedTypes []string        // allowed file types
-	ShowFiles    bool            // true if showing files
-	path         string          // current path
-	entries      []os.DirEntry   // list of entries in current folder
-	cursorPos    int             // cursor position
-	editMode     bool            // true if editing tag
-	textInput    textinput.Model // text input for tag editing
+	Root         string   // root path
+	AllowedTypes []string // allowed file types
+	ShowFiles    bool     // true if showing files
+
+	path      string          // current path
+	entries   []os.DirEntry   // list of entries in current folder
+	cursorPos int             // cursor position
+	editMode  bool            // true if editing tag
+	quitting  bool            // true if quitting
+	textInput textinput.Model // text input for tag editing
 
 	min           int
 	max           int
@@ -127,6 +129,7 @@ type errorMsg struct {
 }
 
 var lastID int64
+
 func nextID() int {
 	return int(atomic.AddInt64(&lastID, 1))
 }
@@ -140,6 +143,7 @@ func New() Model {
 		path:          ".",
 		cursorPos:     0,
 		editMode:      false,
+		quitting:      false,
 		textInput:     textinput.New(),
 		min:           0,
 		max:           0,
@@ -251,6 +255,11 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 // View returns the view of the file picker.
 func (m Model) View() string {
+	if m.quitting {
+		print(tea.ClearScreen())
+		return ""
+	}
+
 	if len(m.entries) == 0 {
 		return m.styles.EmptyDirectory.Height(m.height).MaxHeight(m.height).String()
 	}

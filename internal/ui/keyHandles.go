@@ -7,6 +7,15 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 )
 
+func updateTextInput(m *Model) {
+	if m.Tags.Tag == "" {
+		m.textInput.Reset()
+	} else {
+		m.textInput.SetValue(m.Tags.Tag)
+		m.textInput.CursorEnd()
+	}
+}
+
 func handleGoToTop(m *Model) tea.Cmd {
 	m.cursorPos = 0
 	m.min = 0
@@ -87,6 +96,7 @@ func handleBack(m *Model) tea.Cmd {
 	if m.Tags.Parent != nil {
 		m.Tags = m.Tags.Parent
 	}
+	updateTextInput(m)
 	return m.readDir(m.path)
 }
 
@@ -118,6 +128,7 @@ func handleOpen(m *Model) tea.Cmd {
 		m.min = 0
 		m.max = m.height - 1
 		m.Tags = newTagGetter(m.path, m.Tags)
+		updateTextInput(m)
 		return m.readDir(m.path)
 	}
 	return nil
@@ -137,7 +148,6 @@ func handleEditTag(m *Model) tea.Cmd {
 func handleAccept(m *Model) tea.Cmd {
 	m.editMode = false
 	m.Tags.Tag = m.textInput.Value()
-	m.textInput.Reset()
 	return nil
 }
 

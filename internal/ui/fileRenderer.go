@@ -20,6 +20,13 @@ type folderTag struct {
 
 var tagMap = make(map[string]*folderTag)
 
+func conditionalSlashAppend(s string) string {
+	if s == "" {
+		return ""
+	}
+	return s + "/"
+}
+
 func conditionalSlashJoin(string1 string, string2 string) string {
 	if string1 == "" {
 		return string2
@@ -37,12 +44,12 @@ func styledConditionalSlashJoin(string1 string, string2 string, style1 lipgloss.
 	if string2 == "" {
 		return style1.Render(string1)
 	}
-	return style1.Render(string1 + "/") + style2.Render(string2)
+	return style1.Render(string1+"/") + style2.Render(string2)
 }
 
 func (f *folderTag) parentTagsStr() string {
 	if f.Parent != nil {
-		return conditionalSlashJoin(f.Parent.parentTagsStr(), f.Parent.Tag) // ../../. + "/" + ../. 
+		return conditionalSlashJoin(f.Parent.parentTagsStr(), f.Parent.Tag) // ../../. + "/" + ../.
 	} else {
 		return ""
 	}
@@ -181,6 +188,12 @@ func nextID() int {
 }
 
 func New() Model {
+	ti := textinput.New()
+	ti.TextStyle = DefaultStyles().CurrentTag
+	ti.Cursor.Style = DefaultStyles().CurrentTag
+	ti.CompletionStyle = DefaultStyles().CurrentTag
+	ti.PromptStyle = DefaultStyles().PastTag
+	ti.PlaceholderStyle = DefaultStyles().PastTag
 	return Model{
 		id:            nextID(),
 		Root:          ".",
@@ -190,7 +203,7 @@ func New() Model {
 		cursorPos:     0,
 		editMode:      false,
 		quitting:      false,
-		textInput:     textinput.New(),
+		textInput:     ti,
 		min:           0,
 		max:           0,
 		minStack:      newStack(),
@@ -361,9 +374,12 @@ func (m Model) View() string {
 	}
 
 	if m.editMode {
-		s.WriteString("\nEditing tag: " + styledConditionalSlashJoin(m.Tags.parentTagsStr(), m.textInput.View(), m.styles.PastTag, m.styles.CurrentTag))
+		//s.WriteString("\nEditing tag: " + styledConditionalSlashJoin(m.Tags.parentTagsStr(), m.textInput.View(), m.styles.PastTag, m.styles.CurrentTag))
+		s.WriteString(m.styles.UiString.Render("\nEditing tag: "))
+		m.textInput.Prompt = conditionalSlashAppend(m.Tags.parentTagsStr())
+		s.WriteString(m.textInput.View())
 	} else {
-		s.WriteString("\nCurrent Tag: " + styledConditionalSlashJoin(m.Tags.parentTagsStr(), m.Tags.Tag, m.styles.PastTag, m.styles.CurrentTag))
+		s.WriteString(m.styles.UiString.Render("\nCurrent Tag: ") + styledConditionalSlashJoin(m.Tags.parentTagsStr(), m.Tags.Tag, m.styles.PastTag, m.styles.CurrentTag))
 	}
 
 	// Add padding to the bottom of the list

@@ -4,6 +4,7 @@ import (
 	"os"
 	"path/filepath"
 
+	md "obsidian-tagfmt/internal/mdProcessor"
 	tea "github.com/charmbracelet/bubbletea"
 )
 
@@ -161,4 +162,14 @@ func handleInput(m *Model, msg tea.KeyMsg) tea.Cmd {
 	var cmd tea.Cmd
 	m.textInput, cmd = m.textInput.Update(msg)
 	return cmd
+}
+
+func handleApplyTag(m *Model) tea.Cmd {
+	md.Settings.Tag = m.Tags.Tag
+	md.Settings.DryRun = false
+	err:= md.Main(m.path)
+	if err != nil {
+		m.Message = err.Error()
+	}
+	return nil
 }

@@ -95,12 +95,16 @@ func processFile(path string, tag string) error {
 
 		switch t := existing.(type) {
 		case []any:
+			found := false
 			for _, item := range t {
 				if fmt.Sprint(item) == tag {
+					found = true
 					break
 				}
 			}
-			meta["tags"] = append(t, tag)
+			if !found {
+				meta["tags"] = append(t, tag)
+			}
 		case []string:
 			if !slices.Contains(t, tag) {
 				meta["tags"] = append(t, tag)

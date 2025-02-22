@@ -51,7 +51,7 @@ func DefaultStylesWithRenderer(r *lipgloss.Renderer) Styles {
 		Permission:       r.NewStyle().Foreground(lipgloss.Color("244")),
 		Selected:         r.NewStyle().Foreground(lipgloss.Color("212")).Bold(true), // Currently selected folder
 		FileSize:         r.NewStyle().Foreground(lipgloss.Color("240")).Width(fileSizeWidth).Align(lipgloss.Right),
-		EmptyDirectory:   r.NewStyle().Foreground(lipgloss.Color("240")).PaddingLeft(paddingLeft).SetString("No Files Found."),
+		EmptyDirectory:   r.NewStyle().Foreground(lipgloss.Color("240")).PaddingLeft(paddingLeft),
 		PastTag:          r.NewStyle().Foreground(lipgloss.Color("244")),
 		CurrentTag:       r.NewStyle().Foreground(lipgloss.Color("212")),
 		UiString:         r.NewStyle().Foreground(lipgloss.Color("150")),

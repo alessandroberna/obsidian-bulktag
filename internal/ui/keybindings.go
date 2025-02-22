@@ -37,7 +37,7 @@ func DefaultkeyMap() keyMap {
 		//Select:   key.NewBinding(key.WithKeys("enter"), key.WithHelp("enter", "select")), // not used
 		Quit:     key.NewBinding(key.WithKeys("q", "ctrl+c"), key.WithHelp("q", "quit")),
 		EditTag:  key.NewBinding(key.WithKeys("t"), key.WithHelp("t", "edit current folder's tag")),
-		ApplyTag: key.NewBinding(key.WithKeys("g"), key.WithHelp("g", "apply tag to current folder and children")),
+		ApplyTag: key.NewBinding(key.WithKeys("m"), key.WithHelp("m", "apply tag to current folder and children")),
 		Help:     key.NewBinding(key.WithKeys("?"), key.WithHelp("?", "toggle help")),
 	}
 }

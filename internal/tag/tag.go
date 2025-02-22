@@ -1,11 +1,30 @@
 package tag
 
+import "sync"
+
 type FolderTag struct {
 	Tag    string // tag for a folder entry
 	Parent *FolderTag
 }
 
-var tagMap = make(map[string]*FolderTag)
+//var TagMap = make(map[string]*FolderTag)
+var TagMap sync.Map
+
+func StoreTag(path string, tag *FolderTag) {
+	TagMap.Store(path, tag)
+}
+
+func LoadTag(key string) (*FolderTag, bool) {
+    value, ok := TagMap.Load(key)
+    if !ok {
+        return nil, false
+    }
+    folderTag, ok := value.(*FolderTag)
+    if !ok {
+        return nil, false
+    }
+    return folderTag, true
+}
 
 func ConditionalSlashJoin(string1 string, string2 string) string {
 	if string1 == "" {
@@ -34,11 +53,31 @@ func (f *FolderTag) FullTagStr() string {
 }
 
 func NewTagGetter(path string, parent *FolderTag) *FolderTag {
-	if tag, exists := tagMap[path]; exists {
+	if tag, exists := LoadTag(path); exists {
 		return tag
 	} else {
 		tag := &FolderTag{Tag: "", Parent: parent}
-		tagMap[path] = tag
+		StoreTag(path, tag)
 		return tag
 	}
+}
+
+func (f * FolderTag) NewTagGetter (path string) *FolderTag {
+	if tag, exists := LoadTag(path); exists {
+		return tag
+	} else {
+		tag := &FolderTag{Tag: "", Parent: f}
+		StoreTag(path, tag)
+		return tag
+	}
+}
+
+// returns true if the map is empty
+func CheckEmptyTagMap() bool {
+	empty := true
+	TagMap.Range(func(key, value any) bool {
+		empty = false
+		return false
+	})
+	return empty
 }

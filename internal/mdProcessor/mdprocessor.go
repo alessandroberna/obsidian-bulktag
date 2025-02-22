@@ -6,22 +6,41 @@ import (
 	"os"
 	"strings"
 
+	"obsidian-tagfmt/internal/tag"
 	"github.com/adrg/frontmatter"
 	"gopkg.in/yaml.v3"
 )
 
 type MdSetSt struct {
 	DryRun bool
-	Tag    string
+	Path string
 }
 
 var Settings MdSetSt
 
-func Main(path string) error {
-	if Settings.Tag == "" {
-		return fmt.Errorf("internal error: tag is required")
+func (m *MdSetSt) checkEmptyTag () error {
+	if tag.CheckEmptyTagMap() {
+		return fmt.Errorf("internal Error: empty Tags map")
 	}
-	return traverseDir(path)
+	tag, exists := tag.LoadTag(m.Path)
+	if !exists || tag == nil {
+		return fmt.Errorf("internal Error: Tags map does not contain %s", m.Path)
+	}
+	if tag.FullTagStr() == "" {
+		return fmt.Errorf("cannot apply an empty tag")
+	}
+	Tag = tag
+	return nil
+} 
+
+var Tag *tag.FolderTag
+
+func Main() error {
+	err:= Settings.checkEmptyTag()
+	if err != nil {
+		return err
+	}
+	return traverseDir(Settings.Path)
 }
 
 func traverseDir(path string) error {
@@ -31,10 +50,15 @@ func traverseDir(path string) error {
 	}
 	for _, file := range files {
 		if file.IsDir() {
-			traverseDir(path + "/" + file.Name())
+			newPath := path + "/" + file.Name()
+			// Creates proper pointers even if previously unexplored
+			// Needed to get eventual child tags in subfolders relative
+			// to the path passed to the fucntion
+			Tag.NewTagGetter(newPath) 
+			traverseDir(newPath)
 		} else {
 			if strings.HasSuffix(file.Name(), ".md") {
-				err := processFile(path + "/" + file.Name())
+				err := processFile(path + "/" + file.Name(), Tag.FullTagStr())
 				if err != nil {
 					return err
 				}
@@ -44,7 +68,7 @@ func traverseDir(path string) error {
 	return nil
 }
 
-func processFile(path string) error {
+func processFile(path string, tag string) error {
 	data, err := os.ReadFile(path)
 	if err != nil {
 		return err
@@ -57,7 +81,7 @@ func processFile(path string) error {
 	if err != nil {
 		// If there is no front matter, initialize an empty map and use full file as body.
 		if err == frontmatter.ErrNotFound {
-			meta = make(map[string]interface{})
+			meta = make(map[string]any)
 			body = data
 		} else {
 			return err
@@ -65,12 +89,14 @@ func processFile(path string) error {
 	}
 
 	// Update the "tags" field in meta.
+	
 	if existing, ok := meta["tags"]; ok {
+		
 		switch t := existing.(type) {
 		case []interface{}:
-			meta["tags"] = append(t, Settings.Tag)
+			meta["tags"] = append(t, tag)
 		case []string:
-			meta["tags"] = append(t, Settings.Tag)
+			meta["tags"] = append(t, tag)
 		default:
 			//// If "tags" is present but not a slice, overwrite it.
 			//meta["tags"] = []string{Settings.Tag}
@@ -83,13 +109,13 @@ func processFile(path string) error {
 			default:
 				existingTag = fmt.Sprintf("%v", v)
 			}
-			meta["tags"] = []string{existingTag, Settings.Tag}
+			meta["tags"] = []string{existingTag, tag}
 		}
 	} else {
 		// If no tags exist, create the tags slice with the provided tag.
-		meta["tags"] = []string{Settings.Tag}
+		meta["tags"] = []string{tag}
 	}
-
+	
 	// Marshal the metadata into YAML.
 	yamlBytes, err := yaml.Marshal(meta)
 	if err != nil {

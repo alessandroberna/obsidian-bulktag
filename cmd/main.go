@@ -2,16 +2,16 @@ package cmd
 
 import (
 	"fmt"
+	"obsidian-bulktag/internal"
 	"os"
-	"obsidian-tagfmt/internal"
 
 	"github.com/spf13/cobra"
 )
 
 var rootCmd = &cobra.Command{
-	Use:   "obsidian-tagfmt [folder]",
-	Short: "Obsidian Tagfmt helps you add tags to your Obsidian vault",
-	Long: `Obsidian Tagfmt is a CLI tool to semi-automatically add tags to your Obsidian notes based on folder structure.
+	Use:   "obsidian-bulktag [folder]",
+	Short: "Obsidian bulktag helps you add tags to your Obsidian vault",
+	Long: `Obsidian bulktag is a CLI tool to semi-automatically add tags to your Obsidian notes based on folder structure.
 It provides a navigable interface in the terminal to select folders and apply tags.`,
 	Args: cobra.ExactArgs(1), // Expect exactly one argument: the folder path
 	Run: func(cmd *cobra.Command, args []string) {

@@ -7,7 +7,7 @@ import (
 	"strings"
 	"sync/atomic"
 
-	"obsidian-tagfmt/internal/tag"
+	"obsidian-bulktag/internal/tag"
 
 	"github.com/charmbracelet/bubbles/help"
 	"github.com/charmbracelet/bubbles/textinput"
@@ -224,16 +224,15 @@ func (m Model) View() string {
 		return ""
 	}
 
-
 	var s strings.Builder
-	s.WriteString(m.styles.UiString.Render("Relative path: " + m.path) + "\n\n")
+	s.WriteString(m.styles.UiString.Render("Relative path: "+m.path) + "\n\n")
 	if len(m.entries) == 0 {
 		if m.ShowFiles {
 			s.WriteString(m.styles.EmptyDirectory.Render("This directory is empty.\n"))
 		} else {
 			//s.WriteString(m.styles.EmptyDirectory.Render("This directory is empty. Press 'f' to show files."))
 			s.WriteString(m.styles.EmptyDirectory.Render("No subdirectories found.\n"))
-		//return m.styles.EmptyDirectory.Height(m.height).MaxHeight(m.height).String()
+			//return m.styles.EmptyDirectory.Height(m.height).MaxHeight(m.height).String()
 		}
 	} else {
 		for i, f := range m.entries {

@@ -4,8 +4,8 @@ import (
 	"os"
 	"path/filepath"
 
-	md "obsidian-tagfmt/internal/mdProcessor"
-	"obsidian-tagfmt/internal/tag"
+	md "obsidian-bulktag/internal/mdProcessor"
+	"obsidian-bulktag/internal/tag"
 
 	tea "github.com/charmbracelet/bubbletea"
 )
@@ -100,7 +100,7 @@ func handleBack(m *Model) tea.Cmd {
 		m.Tags = m.Tags.Parent
 	}
 	updateTextInput(m)
-	fullpath:= tag.ConditionalSlashJoin(m.Root, m.path)
+	fullpath := tag.ConditionalSlashJoin(m.Root, m.path)
 	return m.readDir(fullpath)
 }
 
@@ -173,7 +173,7 @@ func handleApplyTag(m *Model) tea.Cmd {
 	md.Settings.DryRun = false
 	md.Settings.Path = m.path
 	md.Settings.Root = m.Root
-	err:= md.Main()
+	err := md.Main()
 	if err != nil {
 		m.Message = err.Error()
 	}

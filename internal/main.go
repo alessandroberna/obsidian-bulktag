@@ -1,13 +1,13 @@
 package internal
 
 import (
-	"obsidian-tagfmt/internal/ui"
+	"obsidian-bulktag/internal/ui"
 
 	tea "github.com/charmbracelet/bubbletea"
 )
 
 type ConfigSt struct {
-	Root string
+	Root      string
 	ShowFiles bool
 }
 

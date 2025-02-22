@@ -1,4 +1,4 @@
-module obsidian-tagfmt
+module obsidian-bulktag
 
 go 1.24.0
 

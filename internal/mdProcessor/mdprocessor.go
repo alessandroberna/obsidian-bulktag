@@ -7,7 +7,7 @@ import (
 	"slices"
 	"strings"
 
-	"obsidian-tagfmt/internal/tag"
+	"obsidian-bulktag/internal/tag"
 
 	"github.com/adrg/frontmatter"
 	"gopkg.in/yaml.v3"
@@ -49,7 +49,7 @@ func Main() error {
 // TODO: concurrent processing
 // TODO: use a channel to communicate errors instead of returning them
 func traverseDir(path string) error {
-	fullPath:= tag.ConditionalSlashJoin(Settings.Root, path)
+	fullPath := tag.ConditionalSlashJoin(Settings.Root, path)
 	files, err := os.ReadDir(fullPath)
 	if err != nil {
 		return err
@@ -62,7 +62,7 @@ func traverseDir(path string) error {
 			// to the path passed to the fucntion
 			Tag.NewTagGetter(newRelPath)
 			traverseDir(newRelPath)
-			} else {
+		} else {
 			if strings.HasSuffix(file.Name(), ".md") {
 				err := processFile(fullPath+"/"+file.Name(), Tag.FullTagStr())
 				if err != nil {

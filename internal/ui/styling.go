@@ -28,8 +28,8 @@ type Styles struct {
 	PastTag    lipgloss.Style
 	CurrentTag lipgloss.Style
 	UiString   lipgloss.Style
-	Help       lipgloss.Style
 	Error      lipgloss.Style
+	Path       lipgloss.Style
 }
 
 // DefaultStyles defines the default styling for the file picker.
@@ -41,11 +41,12 @@ func DefaultStyles() Styles {
 // with a given Lip Gloss renderer.
 func DefaultStylesWithRenderer(r *lipgloss.Renderer) Styles {
 	return Styles{
+		// TODO: properly style these instead of writing random values :/
 		DisabledCursor:   r.NewStyle().Foreground(lipgloss.Color("247")),
 		Cursor:           r.NewStyle().Foreground(lipgloss.Color("212")),
 		Symlink:          r.NewStyle().Foreground(lipgloss.Color("36")),
 		Directory:        r.NewStyle().Foreground(lipgloss.Color("99")),
-		File:             r.NewStyle(),
+		File:             r.NewStyle().Foreground(lipgloss.Color("243")),
 		DisabledFile:     r.NewStyle().Foreground(lipgloss.Color("243")),
 		DisabledSelected: r.NewStyle().Foreground(lipgloss.Color("247")),
 		Permission:       r.NewStyle().Foreground(lipgloss.Color("244")),
@@ -56,6 +57,5 @@ func DefaultStylesWithRenderer(r *lipgloss.Renderer) Styles {
 		CurrentTag:       r.NewStyle().Foreground(lipgloss.Color("212")),
 		UiString:         r.NewStyle().Foreground(lipgloss.Color("150")),
 		Error:            r.NewStyle().Foreground(lipgloss.Color("9")),
-		Help:             r.NewStyle().Foreground(lipgloss.Color("250")),
 	}
 }

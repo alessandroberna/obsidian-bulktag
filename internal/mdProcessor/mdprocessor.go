@@ -143,7 +143,7 @@ func processFile(path string, tag string) error {
 	var b strings.Builder
 	b.WriteString("---\n")
 	b.Write(yamlBytes)
-	b.WriteString("---\n\n")
+	b.WriteString("---\n")
 	b.Write(body)
 
 	// Not really how a dry run is supposed to work

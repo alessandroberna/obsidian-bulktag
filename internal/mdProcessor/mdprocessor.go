@@ -45,6 +45,8 @@ func Main() error {
 	return traverseDir(Settings.Path)
 }
 
+// TODO: concurrent processing
+// TODO: use a channel to communicate errors instead of returning them
 func traverseDir(path string) error {
 	files, err := os.ReadDir(path)
 	if err != nil {

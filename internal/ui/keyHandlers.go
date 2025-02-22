@@ -5,6 +5,8 @@ import (
 	"path/filepath"
 
 	md "obsidian-tagfmt/internal/mdProcessor"
+	"obsidian-tagfmt/internal/tag"
+
 	tea "github.com/charmbracelet/bubbletea"
 )
 
@@ -98,7 +100,8 @@ func handleBack(m *Model) tea.Cmd {
 		m.Tags = m.Tags.Parent
 	}
 	updateTextInput(m)
-	return m.readDir(m.path)
+	fullpath:= tag.ConditionalSlashJoin(m.Root, m.path)
+	return m.readDir(fullpath)
 }
 
 func handleOpen(m *Model) tea.Cmd {
@@ -107,19 +110,21 @@ func handleOpen(m *Model) tea.Cmd {
 	}
 
 	f := m.entries[m.cursorPos]
+	fullpath := filepath.Join(tag.ConditionalSlashJoin(m.Root, m.path), f.Name())
 	info, err := f.Info()
 	if err != nil {
 		return nil
 	}
 	isDir := f.IsDir()
 	if info.Mode()&os.ModeSymlink != 0 { // if it's a symlink
-		symlinkPath, _ := filepath.EvalSymlinks(filepath.Join(m.path, f.Name()))
+		symlinkPath, _ := filepath.EvalSymlinks(fullpath)
 		info, err := os.Stat(symlinkPath)
 		if err != nil {
 			return nil
 		}
 		if info.IsDir() {
 			isDir = true
+			fullpath = tag.ConditionalSlashJoin(m.Root, symlinkPath)
 		}
 	}
 	if isDir {
@@ -130,7 +135,7 @@ func handleOpen(m *Model) tea.Cmd {
 		m.max = m.height - 1
 		m.Tags = m.Tags.NewTagGetter(m.path)
 		updateTextInput(m)
-		return m.readDir(m.path)
+		return m.readDir(fullpath)
 	}
 	return nil
 }

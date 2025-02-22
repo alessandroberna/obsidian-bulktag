@@ -107,44 +107,6 @@ func (m *Model) popView() (int, int, int) {
 	return m.selectedStack.Pop(), m.minStack.Pop(), m.maxStack.Pop()
 }
 
-// Model represents a file picker.
-type NavModel struct {
-	id int
-
-	// Path is the path which the user has selected with the file picker.
-	Path string
-
-	// CurrentDirectory is the directory that the user is currently in.
-	CurrentDirectory string
-
-	// AllowedTypes specifies which file types the user may select.
-	// If empty the user may select any file.
-	AllowedTypes []string
-
-	KeyMap          KeyMap
-	files           []os.DirEntry
-	ShowPermissions bool
-	ShowSize        bool
-	ShowHidden      bool
-	DirAllowed      bool
-	FileAllowed     bool
-
-	FileSelected  string
-	selected      int
-	selectedStack stack
-
-	min      int
-	max      int
-	maxStack stack
-	minStack stack
-
-	Height     int
-	AutoHeight bool
-
-	Cursor string
-	Styles Styles
-}
-
 type Model struct {
 	id int
 
@@ -219,26 +181,6 @@ func New() Model {
 	}
 }
 
-/*
-	func initialModel(root string) Model {
-		m := Model{
-			cursorPos:   0,
-			path:     root,
-			Root:     root,
-			editMode: false,
-			Message:  "",
-		}
-		ti := textinput.New()
-		ti.Placeholder = "Enter tag (no spaces)"
-		ti.Focus()
-		ti.CharLimit = 32
-		ti.Width = 20
-		m.textInput = ti
-		m.Tags = &folderTag{Path: "", Tag: "", Parent: nil}
-		m.updateEntries()
-		return m
-	}
-*/
 type readDirMsg struct {
 	id      int
 	entries []os.DirEntry
@@ -315,6 +257,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 // View returns the view of the file picker.
 func (m Model) View() string {
+	// TODO: split into smaller functions
 	if m.quitting {
 		return ""
 	}

@@ -7,71 +7,11 @@ import (
 	"strings"
 	"sync/atomic"
 
+	"obsidian-tagfmt/internal/tag"
 	"github.com/charmbracelet/bubbles/textinput"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
 )
-
-// keeps track of tags for each folder
-type folderTag struct {
-	Tag    string // tag for this folder entry
-	Parent *folderTag
-}
-
-var tagMap = make(map[string]*folderTag)
-
-func conditionalSlashAppend(s string) string {
-	if s == "" {
-		return ""
-	}
-	return s + "/"
-}
-
-func conditionalSlashJoin(string1 string, string2 string) string {
-	if string1 == "" {
-		return string2
-	}
-	if string2 == "" {
-		return string1
-	}
-	return string1 + "/" + string2
-}
-
-func styledConditionalSlashJoin(string1 string, string2 string, style1 lipgloss.Style, style2 lipgloss.Style) string {
-	if string1 == "" {
-		return style2.Render(string2)
-	}
-	if string2 == "" {
-		return style1.Render(string1)
-	}
-	return style1.Render(string1+"/") + style2.Render(string2)
-}
-
-func (f *folderTag) parentTagsStr() string {
-	if f.Parent != nil {
-		return conditionalSlashJoin(f.Parent.parentTagsStr(), f.Parent.Tag) // ../../. + "/" + ../.
-	} else {
-		return ""
-	}
-}
-
-func (f *folderTag) fullTagStr() string {
-	if f.Tag != "" {
-		return conditionalSlashJoin(f.parentTagsStr(), f.Tag)
-	} else {
-		return f.parentTagsStr()
-	}
-}
-
-func newTagGetter(path string, parent *folderTag) *folderTag {
-	if tag, exists := tagMap[path]; exists {
-		return tag
-	} else {
-		tag := &folderTag{Tag: "", Parent: parent}
-		tagMap[path] = tag
-		return tag
-	}
-}
 
 // needed to manage the navigation history
 type stack struct {
@@ -135,7 +75,7 @@ type Model struct {
 	keyMap      KeyMap
 	inputKeyMap InputKeyMap
 
-	Tags    *folderTag // list of tags
+	Tags    *tag.FolderTag // list of tags
 	Message string     // status or feedback message
 }
 
@@ -177,7 +117,7 @@ func New() Model {
 		styles:        DefaultStyles(),
 		keyMap:        DefaultKeyMap(),
 		inputKeyMap:   DefaultInputKeyMap(),
-		Tags:          newTagGetter(".", nil),
+		Tags:          tag.NewTagGetter(".", nil),
 	}
 }
 
@@ -255,6 +195,23 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	return m, nil
 }
 
+func styledConditionalSlashJoin(string1 string, string2 string, style1 lipgloss.Style, style2 lipgloss.Style) string {
+	if string1 == "" {
+		return style2.Render(string2)
+	}
+	if string2 == "" {
+		return style1.Render(string1)
+	}
+	return style1.Render(string1+"/") + style2.Render(string2)
+}
+
+func conditionalSlashAppend(s string) string {
+	if s == "" {
+		return ""
+	}
+	return s + "/"
+}
+
 // View returns the view of the file picker.
 func (m Model) View() string {
 	// TODO: split into smaller functions
@@ -319,10 +276,10 @@ func (m Model) View() string {
 	if m.editMode {
 		//s.WriteString("\nEditing tag: " + styledConditionalSlashJoin(m.Tags.parentTagsStr(), m.textInput.View(), m.styles.PastTag, m.styles.CurrentTag))
 		s.WriteString(m.styles.UiString.Render("\nEditing tag: "))
-		m.textInput.Prompt = conditionalSlashAppend(m.Tags.parentTagsStr())
+		m.textInput.Prompt = conditionalSlashAppend(m.Tags.ParentTagsStr())
 		s.WriteString(m.textInput.View())
 	} else {
-		s.WriteString(m.styles.UiString.Render("\nCurrent Tag: ") + styledConditionalSlashJoin(m.Tags.parentTagsStr(), m.Tags.Tag, m.styles.PastTag, m.styles.CurrentTag))
+		s.WriteString(m.styles.UiString.Render("\nCurrent Tag: ") + styledConditionalSlashJoin(m.Tags.ParentTagsStr(), m.Tags.Tag, m.styles.PastTag, m.styles.CurrentTag))
 	}
 
 	// Add padding to the bottom of the list

@@ -4,6 +4,7 @@ import (
 	"os"
 	"path/filepath"
 
+	"obsidian-tagfmt/internal/tag"
 	md "obsidian-tagfmt/internal/mdProcessor"
 	tea "github.com/charmbracelet/bubbletea"
 )
@@ -128,7 +129,7 @@ func handleOpen(m *Model) tea.Cmd {
 		m.cursorPos = 0
 		m.min = 0
 		m.max = m.height - 1
-		m.Tags = newTagGetter(m.path, m.Tags)
+		m.Tags = tag.NewTagGetter(m.path, m.Tags)
 		updateTextInput(m)
 		return m.readDir(m.path)
 	}

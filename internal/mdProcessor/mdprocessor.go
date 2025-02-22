@@ -16,6 +16,7 @@ import (
 type MdSetSt struct {
 	DryRun bool
 	Path   string
+	Root   string
 }
 
 var Settings MdSetSt
@@ -48,21 +49,22 @@ func Main() error {
 // TODO: concurrent processing
 // TODO: use a channel to communicate errors instead of returning them
 func traverseDir(path string) error {
-	files, err := os.ReadDir(path)
+	fullPath:= tag.ConditionalSlashJoin(Settings.Root, path)
+	files, err := os.ReadDir(fullPath)
 	if err != nil {
 		return err
 	}
 	for _, file := range files {
 		if file.IsDir() {
-			newPath := path + "/" + file.Name()
+			newRelPath := path + "/" + file.Name()
 			// Creates proper pointers even if previously unexplored
 			// Needed to get eventual child tags in subfolders relative
 			// to the path passed to the fucntion
-			Tag.NewTagGetter(newPath)
-			traverseDir(newPath)
-		} else {
+			Tag.NewTagGetter(newRelPath)
+			traverseDir(newRelPath)
+			} else {
 			if strings.HasSuffix(file.Name(), ".md") {
-				err := processFile(path+"/"+file.Name(), Tag.FullTagStr())
+				err := processFile(fullPath+"/"+file.Name(), Tag.FullTagStr())
 				if err != nil {
 					return err
 				}
@@ -144,6 +146,9 @@ func processFile(path string, tag string) error {
 	b.WriteString("---\n\n")
 	b.Write(body)
 
+	// Not really how a dry run is supposed to work
+	// also not thread-safe
+	// but at least it does not touch the original files
 	if Settings.DryRun {
 		if _, err := os.Stat("dryrun.md"); os.IsNotExist(err) {
 			// File does not exist, create it with initial content.

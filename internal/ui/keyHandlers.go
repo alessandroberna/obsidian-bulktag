@@ -172,6 +172,7 @@ func handleInput(m *Model, msg tea.KeyMsg) tea.Cmd {
 func handleApplyTag(m *Model) tea.Cmd {
 	md.Settings.DryRun = false
 	md.Settings.Path = m.path
+	md.Settings.Root = m.Root
 	err:= md.Main()
 	if err != nil {
 		m.Message = err.Error()

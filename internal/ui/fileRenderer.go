@@ -225,60 +225,66 @@ func (m Model) View() string {
 		return ""
 	}
 
-	if len(m.entries) == 0 {
-		return m.styles.EmptyDirectory.Height(m.height).MaxHeight(m.height).String()
-	}
+
 	var s strings.Builder
-
-	for i, f := range m.entries {
-		if i < m.min || i > m.max-2 {
-			continue
+	if len(m.entries) == 0 {
+		if m.ShowFiles {
+			s.WriteString(m.styles.EmptyDirectory.Render("This directory is empty."))
+		} else {
+			//s.WriteString(m.styles.EmptyDirectory.Render("This directory is empty. Press 'f' to show files."))
+			s.WriteString(m.styles.EmptyDirectory.Render("No subdirectories found."))
+		//return m.styles.EmptyDirectory.Height(m.height).MaxHeight(m.height).String()
 		}
+	} else {
+		for i, f := range m.entries {
+			if i < m.min || i > m.max-2 {
+				continue
+			}
 
-		var symlinkPath string
-		info, _ := f.Info()
-		isSymlink := info.Mode()&os.ModeSymlink != 0
-		name := f.Name()
+			var symlinkPath string
+			info, _ := f.Info()
+			isSymlink := info.Mode()&os.ModeSymlink != 0
+			name := f.Name()
 
-		if isSymlink {
-			symlinkPath, _ = filepath.EvalSymlinks(filepath.Join(m.path, name))
-		}
-
-		disabled := !m.canSelect(name) && !f.IsDir()
-
-		if m.cursorPos == i { //nolint:nestif
-			selected := ""
-			selected += " " + name
 			if isSymlink {
-				selected += " → " + symlinkPath
+				symlinkPath, _ = filepath.EvalSymlinks(filepath.Join(m.path, name))
 			}
-			if disabled {
-				s.WriteString(m.styles.DisabledSelected.Render(m.cursorGlyph) + m.styles.DisabledSelected.Render(selected))
-			} else {
-				s.WriteString(m.styles.Cursor.Render(m.cursorGlyph) + m.styles.Selected.Render(selected))
+
+			disabled := !m.canSelect(name) && !f.IsDir()
+
+			if m.cursorPos == i { //nolint:nestif
+				selected := ""
+				selected += " " + name
+				if isSymlink {
+					selected += " → " + symlinkPath
+				}
+				if disabled {
+					s.WriteString(m.styles.DisabledSelected.Render(m.cursorGlyph) + m.styles.DisabledSelected.Render(selected))
+				} else {
+					s.WriteString(m.styles.Cursor.Render(m.cursorGlyph) + m.styles.Selected.Render(selected))
+				}
+				s.WriteRune('\n')
+				continue
 			}
+
+			style := m.styles.File
+			if f.IsDir() {
+				style = m.styles.Directory
+			} else if isSymlink {
+				style = m.styles.Symlink
+			} else if disabled {
+				style = m.styles.DisabledFile
+			}
+
+			fileName := style.Render(name)
+			s.WriteString(m.styles.Cursor.Render(" "))
+			if isSymlink {
+				fileName += " → " + symlinkPath
+			}
+			s.WriteString(" " + fileName)
 			s.WriteRune('\n')
-			continue
 		}
-
-		style := m.styles.File
-		if f.IsDir() {
-			style = m.styles.Directory
-		} else if isSymlink {
-			style = m.styles.Symlink
-		} else if disabled {
-			style = m.styles.DisabledFile
-		}
-
-		fileName := style.Render(name)
-		s.WriteString(m.styles.Cursor.Render(" "))
-		if isSymlink {
-			fileName += " → " + symlinkPath
-		}
-		s.WriteString(" " + fileName)
-		s.WriteRune('\n')
 	}
-
 	if m.editMode {
 		//s.WriteString("\nEditing tag: " + styledConditionalSlashJoin(m.Tags.parentTagsStr(), m.textInput.View(), m.styles.PastTag, m.styles.CurrentTag))
 		s.WriteString(m.styles.UiString.Render("\nEditing tag: "))

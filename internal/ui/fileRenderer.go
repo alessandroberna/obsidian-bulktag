@@ -8,6 +8,8 @@ import (
 	"sync/atomic"
 
 	"obsidian-tagfmt/internal/tag"
+
+	"github.com/charmbracelet/bubbles/help"
 	"github.com/charmbracelet/bubbles/textinput"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
@@ -66,17 +68,18 @@ type Model struct {
 	minStack      stack
 	maxStack      stack
 	selectedStack stack
+	help          help.Model
 
 	height     int
 	autoHeight bool
 
 	cursorGlyph string
 	styles      Styles
-	keyMap      KeyMap
-	inputKeyMap InputKeyMap
+	keyMap      keyMap
+	inputkeyMap InputkeyMap
 
 	Tags    *tag.FolderTag // list of tags
-	Message string     // status or feedback message
+	Message string         // status or feedback message
 }
 
 type errorMsg struct {
@@ -108,6 +111,7 @@ func New() Model {
 		textInput:     ti,
 		min:           0,
 		max:           0,
+		help:          help.New(),
 		minStack:      newStack(),
 		maxStack:      newStack(),
 		selectedStack: newStack(),
@@ -115,8 +119,8 @@ func New() Model {
 		autoHeight:    true,
 		cursorGlyph:   ">",
 		styles:        DefaultStyles(),
-		keyMap:        DefaultKeyMap(),
-		inputKeyMap:   DefaultInputKeyMap(),
+		keyMap:        DefaultkeyMap(),
+		inputkeyMap:   DefaultInputkeyMap(),
 		Tags:          tag.NewTagGetter(".", nil),
 	}
 }
@@ -187,6 +191,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		if m.autoHeight {
 			m.height = msg.Height - marginBottom
 		}
+		m.help.Width = msg.Width
 		m.max = m.height - 1
 	case tea.KeyMsg:
 		cmd := basicKeyHandler(&m, msg)
@@ -277,11 +282,15 @@ func (m Model) View() string {
 		//s.WriteString("\nEditing tag: " + styledConditionalSlashJoin(m.Tags.parentTagsStr(), m.textInput.View(), m.styles.PastTag, m.styles.CurrentTag))
 		s.WriteString(m.styles.UiString.Render("\nEditing tag: "))
 		m.textInput.Prompt = conditionalSlashAppend(m.Tags.ParentTagsStr())
-		s.WriteString(m.textInput.View())
+		s.WriteString(m.textInput.View() + "\n")
 	} else {
-		s.WriteString(m.styles.UiString.Render("\nCurrent Tag: ") + styledConditionalSlashJoin(m.Tags.ParentTagsStr(), m.Tags.Tag, m.styles.PastTag, m.styles.CurrentTag))
+		s.WriteString(m.styles.UiString.Render("\nCurrent Tag: ") + styledConditionalSlashJoin(m.Tags.ParentTagsStr(), m.Tags.Tag, m.styles.PastTag, m.styles.CurrentTag) + "\n")
 	}
 
+	if m.Message != "" {
+		s.WriteString("\n" + m.styles.Error.Render(m.Message) + "\n")
+	}
+	s.WriteString(m.help.View(m.keyMap))
 	// Add padding to the bottom of the list
 	for i := lipgloss.Height(s.String()); i <= m.height; i++ {
 		s.WriteRune('\n')

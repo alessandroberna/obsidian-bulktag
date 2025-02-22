@@ -173,3 +173,8 @@ func handleApplyTag(m *Model) tea.Cmd {
 	}
 	return nil
 }
+
+func handleHelp(m *Model) tea.Cmd {
+	m.help.ShowAll = !m.help.ShowAll
+	return nil
+}

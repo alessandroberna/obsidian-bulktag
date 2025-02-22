@@ -5,7 +5,7 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 )
 
-type KeyMap struct {
+type keyMap struct {
 	// from bubbles/filepicker
 	GoToTop  key.Binding
 	GoToLast key.Binding
@@ -24,8 +24,8 @@ type KeyMap struct {
 	Help     key.Binding
 }
 
-func DefaultKeyMap() KeyMap {
-	return KeyMap{
+func DefaultkeyMap() keyMap {
+	return keyMap{
 		GoToTop:  key.NewBinding(key.WithKeys("g"), key.WithHelp("g", "go to first")),
 		GoToLast: key.NewBinding(key.WithKeys("G"), key.WithHelp("G", "go to last")),
 		Down:     key.NewBinding(key.WithKeys("s", "j", "down", "ctrl+n"), key.WithHelp("↓/j/s/ctrl+n", "move down")),
@@ -42,13 +42,25 @@ func DefaultKeyMap() KeyMap {
 	}
 }
 
-type InputKeyMap struct {
+func (k keyMap) ShortHelp() []key.Binding {
+	return []key.Binding{k.Help, k.Quit}
+}
+
+func (k keyMap) FullHelp() [][]key.Binding {
+	return [][]key.Binding{
+		{k.GoToTop, k.GoToLast, k.Up, k.Down},
+		{k.PageUp, k.PageDown, k.Back, k.Open},
+		{k.Help, k.Quit, k.EditTag, k.ApplyTag},
+	}
+}
+
+type InputkeyMap struct {
 	Accept key.Binding
 	Cancel key.Binding
 }
 
-func DefaultInputKeyMap() InputKeyMap {
-	return InputKeyMap{
+func DefaultInputkeyMap() InputkeyMap {
+	return InputkeyMap{
 		Accept: key.NewBinding(key.WithKeys("enter"), key.WithHelp("enter", "accept")),
 		Cancel: key.NewBinding(key.WithKeys("esc")),
 	}
@@ -81,15 +93,17 @@ func basicKeyHandler(m *Model, msg tea.KeyMsg) tea.Cmd {
 		return handleEditTag(m)
 	case key.Matches(msg, m.keyMap.ApplyTag):
 		return handleApplyTag(m)
+	case key.Matches(msg, m.keyMap.Help):
+		return handleHelp(m)
 	}
 	return nil
 }
 
 func editModeHandler(m *Model, msg tea.KeyMsg) tea.Cmd {
 	switch {
-	case key.Matches(msg, m.inputKeyMap.Accept):
+	case key.Matches(msg, m.inputkeyMap.Accept):
 		return handleAccept(m)
-	case key.Matches(msg, m.inputKeyMap.Cancel):
+	case key.Matches(msg, m.inputkeyMap.Cancel):
 		return handleCancel(m)
 	default:
 		return handleInput(m, msg)

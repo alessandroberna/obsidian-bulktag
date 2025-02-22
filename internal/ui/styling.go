@@ -29,6 +29,7 @@ type Styles struct {
 	CurrentTag lipgloss.Style
 	UiString   lipgloss.Style
 	Help       lipgloss.Style
+	Error      lipgloss.Style
 }
 
 // DefaultStyles defines the default styling for the file picker.
@@ -54,5 +55,7 @@ func DefaultStylesWithRenderer(r *lipgloss.Renderer) Styles {
 		PastTag:          r.NewStyle().Foreground(lipgloss.Color("244")),
 		CurrentTag:       r.NewStyle().Foreground(lipgloss.Color("212")),
 		UiString:         r.NewStyle().Foreground(lipgloss.Color("150")),
+		Error:            r.NewStyle().Foreground(lipgloss.Color("9")),
+		Help:             r.NewStyle().Foreground(lipgloss.Color("250")),
 	}
 }

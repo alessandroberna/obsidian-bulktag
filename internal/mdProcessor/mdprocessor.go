@@ -93,7 +93,7 @@ func processFile(path string, tag string) error {
 	if existing, ok := meta["tags"]; ok {
 		
 		switch t := existing.(type) {
-		case []interface{}:
+		case []any:
 			meta["tags"] = append(t, tag)
 		case []string:
 			meta["tags"] = append(t, tag)

@@ -112,6 +112,7 @@ func New() Model {
 		min:           0,
 		max:           0,
 		help:          help.New(),
+		Message:       "",
 		minStack:      newStack(),
 		maxStack:      newStack(),
 		selectedStack: newStack(),
@@ -288,7 +289,7 @@ func (m Model) View() string {
 	}
 
 	if m.Message != "" {
-		s.WriteString("\n" + m.styles.Error.Render(m.Message) + "\n")
+		s.WriteString(m.styles.Error.Render(m.Message) + "\n")
 	}
 	s.WriteString(m.help.View(m.keyMap))
 	// Add padding to the bottom of the list

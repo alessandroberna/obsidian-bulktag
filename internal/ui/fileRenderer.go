@@ -15,7 +15,6 @@ import (
 	"github.com/charmbracelet/lipgloss"
 )
 
-// needed to manage the navigation history
 type stack struct {
 	Push   func(int)
 	Pop    func() int
@@ -227,12 +226,13 @@ func (m Model) View() string {
 
 
 	var s strings.Builder
+	s.WriteString(m.styles.UiString.Render("Relative path: " + m.path) + "\n\n")
 	if len(m.entries) == 0 {
 		if m.ShowFiles {
-			s.WriteString(m.styles.EmptyDirectory.Render("This directory is empty."))
+			s.WriteString(m.styles.EmptyDirectory.Render("This directory is empty.\n"))
 		} else {
 			//s.WriteString(m.styles.EmptyDirectory.Render("This directory is empty. Press 'f' to show files."))
-			s.WriteString(m.styles.EmptyDirectory.Render("No subdirectories found."))
+			s.WriteString(m.styles.EmptyDirectory.Render("No subdirectories found.\n"))
 		//return m.styles.EmptyDirectory.Height(m.height).MaxHeight(m.height).String()
 		}
 	} else {

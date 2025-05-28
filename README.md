@@ -3,8 +3,8 @@ A small TUI tool written in Go to bulk tag Obsidian notes.
 
 ## Main features:
 - **Folder based, Hierarchical Tags:** Tags are assigned to folders. Each folder will inherit the parent folder's tags (if any). See [example](#tagging-example).
-- **Bulk Tagging:** The *Apply Tags* command will add tags to all notes in the current directory and its subdirectories.
-- **YAML parsing:** This parses the YAML frontmatter and adds the new tags without removing existing ones or modifying other file attributes.
+- **Bulk Tagging:** The *Apply Tags* command will add tags to all notes in the current directory and its subdirectories, all with a single keypress.
+- **YAML parsing:** This parses the YAML frontmatter and adds the new tags without removing or modifying existing ones, if present. 
 - **TUI:** Simple, keyboard-driven interface. VIM keybindings are supported.
 
 ## Tagging Example:
@@ -16,7 +16,7 @@ MyVault/               (No tag)
 │   │   └── note1.md
 │   └── General/       (No tag)
 │      └── note2.md
-│      └── Unsorted    (Tag assigned: `unsorted`)
+│      └── Unsorted/    (Tag assigned: `unsorted`)
 │         └── note3.md
 └── note4.md           (No tag)
 ```
@@ -48,18 +48,18 @@ date: 1989-06-04
 ---
 ```
 # Disclaimer:
-This tool was quickly put together to solve a personal problem. It has not been extensively tested, and is to be considered experimental. 
+This project was quickly put together to solve a personal problem. It has not been extensively tested and should be considered experimental.
 
-Please back up your notes before using this tool. I am not responsible for any data loss or corruption caused by this tool.
+Please back up your notes before using the tool. I am not responsible for any data loss or corruption caused by it.
 
 # Usage:
 ## Installation:
 TBD
-## Start
+## Usage
 TBD
 
 ## Keymaps
-Press <kbd>?</kbd>/<kbd>i</kbd> to show a list of available keymaps:
+You can also press <kbd>?</kbd> or <kbd>i</kbd> while using the program to view the available keymaps.
    Key(s)                    | Description                     |
  |:--------------------------|:--------------------------------|
  | <kbd>g</kbd>              | Go to first                     |
